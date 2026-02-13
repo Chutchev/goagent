@@ -7,16 +7,21 @@ import (
 	"github.com/Chutchev/goagent/pkg/clients/llm"
 	"github.com/Chutchev/goagent/pkg/config"
 	"log"
+	"log/slog"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
+	"time"
 )
 
 type Agent struct {
 	systemPrompt string
 	Name         string
+	Mode         string
 }
 
-func NewAgent(promptFile *string, name string) *Agent {
+func NewAgent(promptFile *string, name, mode string) *Agent {
 	systemPrompt, err := os.ReadFile(*promptFile)
 	if err != nil {
 		log.Fatalf("system prompt file read failed: %v", err)
@@ -24,10 +29,11 @@ func NewAgent(promptFile *string, name string) *Agent {
 	return &Agent{
 		systemPrompt: string(systemPrompt),
 		Name:         name,
+		Mode:         mode,
 	}
 }
 
-func (a *Agent) RunInteractive() {
+func (a *Agent) runInteractive() {
 	var lines []string
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
@@ -47,6 +53,40 @@ func (a *Agent) RunInteractive() {
 		prompt := strings.Join(lines, "\n")
 		a.do(prompt)
 	}
+}
+
+func (a *Agent) runGRPC() {
+}
+
+func (a *Agent) runHTTP() {
+
+}
+
+func (a *Agent) survey() {}
+
+func (a *Agent) Run() {
+	go func() {
+		for {
+			slog.Info("Попытка опроса всех агентов")
+			time.Sleep(5 * time.Second)
+		}
+	}()
+	switch a.Mode {
+	case "i":
+		go a.runInteractive()
+	case "grpc":
+		go a.runGRPC()
+	case "http":
+		go a.runHTTP()
+	default:
+		log.Fatal("")
+	}
+
+	// Сюда вставить запуск HTTP Сервера
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	slog.Info("Получен сигнал завершения, останавливаемся...")
 }
 
 func (a *Agent) do(userPrompt string) {
