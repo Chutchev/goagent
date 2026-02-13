@@ -22,7 +22,7 @@ type AgentInterface interface {
 	GetName() string
 }
 
-func NewAgent(systemPrompt, userPrompt, name, mode string) AgentInterface {
+func NewAgent(systemPrompt, userPrompt, name, mode string) *Agent {
 
 	return &Agent{
 		systemPrompt: systemPrompt,
