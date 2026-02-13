@@ -12,7 +12,6 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
-	"time"
 )
 
 type Agent struct {
@@ -65,12 +64,6 @@ func (a *Agent) runHTTP() {
 func (a *Agent) survey() {}
 
 func (a *Agent) Run() {
-	go func() {
-		for {
-			slog.Info("Попытка опроса всех агентов")
-			time.Sleep(5 * time.Second)
-		}
-	}()
 	switch a.Mode {
 	case "i":
 		go a.runInteractive()
